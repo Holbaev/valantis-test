@@ -58,6 +58,7 @@ const ProductList = () => {
       );
     } catch (err) {
       console.log(err.message);
+      getData();
     }
   };
 
