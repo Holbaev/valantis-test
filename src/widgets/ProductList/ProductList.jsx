@@ -13,10 +13,13 @@ import {
   getProducts,
 } from "../../shared/service/ProductService";
 import Pagination from "../../entites/Pagination/Pagination";
+import { toast } from "react-toastify";
+
 
 const ProductList = () => {
   // states
   const dispatch = useDispatch();
+  const MAX_RETRIES = 3;
   const product_ids = useSelector((state) => state.products.products_ids);
   const products = useSelector((state) => state.products.products);
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,7 +30,7 @@ const ProductList = () => {
   const nPages = Math.ceil(products.length / recordPage);
 
   // functions
-  const getProductIds = async () => {
+  const getProductIds = async (retryCount = 0) => {
     try {
       const response = await getProduct_Ids();
       const readyArray = [...new Set(response.data.result)];
@@ -38,11 +41,16 @@ const ProductList = () => {
       );
     } catch (err) {
       console.log(err.message);
+      if (retryCount < MAX_RETRIES) {
+        getProductIds(retryCount + 1);
+      } else {
+        toast.warning('Превышено максимальное количество попыток');
+      }
       getProductIds();
     }
   };
 
-  const getData = async () => {
+  const getData = async (retryCount = 0) => {
     try {
       const response = await getProducts(product_ids);
       const products = response.data.result;
@@ -58,6 +66,12 @@ const ProductList = () => {
       );
     } catch (err) {
       console.log(err.message);
+      console.log(err.message);
+      if (retryCount < MAX_RETRIES) {
+        getProductIds(retryCount + 1);
+      } else {
+        toast.warning('Превышено максимальное количество попыток');
+      }
       getData();
     }
   };

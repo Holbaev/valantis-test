@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./Filters.scss";
-import { Filter } from "../../shared/service/ProductService";
+import { Filter , getProduct_Ids } from "../../shared/service/ProductService";
 import { useDispatch, useSelector } from "react-redux";
 import { setProductsIds } from "../../shared/store/reducers/ProductSlice";
 import { toast } from "react-toastify";
@@ -14,38 +14,54 @@ const Filters = () => {
 
   // functions
   const handleChange = (target, setState) => setState(target);
-  
-  const handleFilter = async (type , text) => {
-    if(title === "" && brand === "" && price === ""){
-        toast.warning("Пожалуйста, напишите значение фильтра.");
-    }else{
-        try {
-          const response = await Filter(type , text);
-          if(response.data.result?.length !== 0){
-            const readyArray = [...new Set(response.data.result)];
-            dispatch(
-              setProductsIds({
-                products_ids: readyArray,
-              })
-            );
-            toast.success("Продукты успешно отфильтрованы.");
-            setTitle("");
-            setBrand("");
-            setPrice("");
-          }else {
-            toast.warning("Извините, но у нас нет таких продуктов.");
-            setTitle("");
-            setBrand("");
-            setPrice("");
-          }
-        } catch (err) {
-            console.log(err.message);
-        }
-    }
-};
 
+  const handleFilter = async (type, text) => {
+    if (title === "" && brand === "" && price === "") {
+      toast.warning("Пожалуйста, напишите значение фильтра.");
+    } else {
+      try {
+        const response = await Filter(type, text);
+        if (response.data.result?.length !== 0) {
+          const readyArray = [...new Set(response.data.result)];
+          dispatch(
+            setProductsIds({
+              products_ids: readyArray,
+            })
+          );
+          toast.success("Продукты успешно отфильтрованы.");
+          setTitle("");
+          setBrand("");
+          setPrice("");
+        } else {
+          toast.warning("Извините, но у нас нет таких продуктов.");
+          setTitle("");
+          setBrand("");
+          setPrice("");
+        }
+      } catch (err) {
+        console.log(err.message);
+      }
+    }
+  };
+
+  const getProductIds = async () => {
+    try {
+      const response = await getProduct_Ids();
+      const readyArray = [...new Set(response.data.result)];
+      dispatch(
+        setProductsIds({
+          products_ids: readyArray,
+        })
+      );
+      toast.success("Все продукты на своих местах.");
+    } catch (err) {
+      console.log(err.message);
+      getProductIds();
+    }
+  };
   return (
     <div className="filter">
+      <div className="box-flex">
       <div className="filter_flex">
         <div className="filter_cards">
           <h3 className="title_name">Title</h3>
@@ -58,7 +74,12 @@ const Filters = () => {
                 placeholder="Название продукта."
                 onChange={(e) => handleChange(e.target.value, setTitle)}
               />
-              <button className="checkboks_text" onClick={() => handleFilter("product" , title)}>Ok</button>
+              <button
+                className="checkboks_text"
+                onClick={() => handleFilter("product", title)}
+              >
+                Ok
+              </button>
             </div>
           </div>
         </div>
@@ -72,7 +93,12 @@ const Filters = () => {
               placeholder="Цена продукта."
               value={price}
             />
-            <button className="checkboks_text" onClick={() => handleFilter("price" , Number(price))}>Ok</button>
+            <button
+              className="checkboks_text"
+              onClick={() => handleFilter("price", Number(price))}
+            >
+              Ok
+            </button>
           </div>
         </div>
         <div className="filter_cards">
@@ -85,13 +111,21 @@ const Filters = () => {
               placeholder="Бренд продукта."
               value={brand}
             />
-            <button className="checkboks_text" onClick={() => handleFilter("brand" , brand)}>Ok</button>
+            <button
+              className="checkboks_text"
+              onClick={() => handleFilter("brand", brand)}
+            >
+              Ok
+            </button>
           </div>
         </div>
+      </div>
+      <div className="goback">
+        <button className="goback_btn" onClick={getProductIds}>Все продукты</button>
+      </div>
       </div>
     </div>
   );
 };
 
 export default Filters;
- 
