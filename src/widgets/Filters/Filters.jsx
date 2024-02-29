@@ -21,16 +21,23 @@ const Filters = () => {
     }else{
         try {
           const response = await Filter(type , text);
-          const readyArray = [...new Set(response.data.result)];
-          dispatch(
-            setProductsIds({
-              products_ids: readyArray,
-            })
-          );
-          toast.success("Продукты успешно отфильтрованы.");
-          setTitle("");
-          setBrand("");
-          setPrice("");
+          if(response.data.result?.length !== 0){
+            const readyArray = [...new Set(response.data.result)];
+            dispatch(
+              setProductsIds({
+                products_ids: readyArray,
+              })
+            );
+            toast.success("Продукты успешно отфильтрованы.");
+            setTitle("");
+            setBrand("");
+            setPrice("");
+          }else {
+            toast.warning("Извините, но у нас нет таких продуктов.");
+            setTitle("");
+            setBrand("");
+            setPrice("");
+          }
         } catch (err) {
             console.log(err.message);
         }
